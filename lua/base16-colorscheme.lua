@@ -11,13 +11,20 @@ local M = {}
 -- local colorscheme = require('colorscheme')
 -- local hi = colorscheme.highlight
 -- hi.Comment = { guifg='#ffffff', guibg='#000000', gui='italic', guisp=nil }
+-- hi.LspDiagnosticsDefaultError = 'DiagnosticError' -- Link to another group
 --
 -- This is equivalent to the following vimscript
 --
 -- hi Comment guifg=#ffffff guibg=#000000 gui=italic
+-- hi! link LspDiagnosticsDefaultError DiagnosticError
 M.highlight = setmetatable({}, {
     __newindex = function(_, hlgroup, args)
-        local guifg, guibg, gui, guisp = args.guifg, args.guibg, args.gui, args.guisp
+        if ('string' == type(args)) then
+            vim.cmd(('hi! link %s %s'):format(hlgroup, args))
+            return
+        end
+
+        local guifg, guibg, gui, guisp = args.guifg or nil, args.guibg or nil, args.gui or nil, args.guisp or nil
         local cmd = {'hi', hlgroup}
         if guifg then table.insert(cmd, 'guifg='..guifg) end
         if guibg then table.insert(cmd, 'guibg='..guibg) end
@@ -56,7 +63,6 @@ function M.setup(colors)
     vim.cmd('set termguicolors')
 
     M.colors = colors or M.colorschemes[vim.env.BASE16_THEME] or M.colorschemes['schemer-dark']
-
     local hi = M.highlight
 
     -- Vim editor colors
@@ -91,8 +97,8 @@ function M.setup(colors)
     hi.NonText      = { guifg = M.colors.base03, guibg = nil,             gui = nil,    guisp = nil }
     hi.LineNr       = { guifg = M.colors.base04, guibg = M.colors.base00, gui = nil,    guisp = nil }
     hi.SignColumn   = { guifg = M.colors.base04, guibg = M.colors.base00, gui = nil,    guisp = nil }
-    hi.StatusLine   = { guifg = M.colors.base04, guibg = M.colors.base02, gui = 'none', guisp = nil }
-    hi.StatusLineNC = { guifg = M.colors.base03, guibg = M.colors.base01, gui = 'none', guisp = nil }
+    hi.StatusLine   = { guifg = M.colors.base05, guibg = M.colors.base02, gui = 'none', guisp = nil }
+    hi.StatusLineNC = { guifg = M.colors.base04, guibg = M.colors.base01, gui = 'none', guisp = nil }
     hi.VertSplit    = { guifg = M.colors.base05, guibg = M.colors.base00, gui = 'none', guisp = nil }
     hi.ColorColumn  = { guifg = nil,             guibg = M.colors.base01, gui = 'none', guisp = nil }
     hi.CursorColumn = { guifg = nil,             guibg = M.colors.base01, gui = 'none', guisp = nil }
@@ -174,25 +180,27 @@ function M.setup(colors)
     hi.SpellCap   = { guifg = nil, guibg = nil, gui = 'undercurl', guisp = M.colors.base0D }
     hi.SpellRare  = { guifg = nil, guibg = nil, gui = 'undercurl', guisp = M.colors.base0E }
 
-    hi.LspReferenceText                   = { guifg = nil,             guibg = nil, gui = 'underline', guisp = M.colors.base04 }
-    hi.LspReferenceRead                   = { guifg = nil,             guibg = nil, gui = 'underline', guisp = M.colors.base04 }
-    hi.LspReferenceWrite                  = { guifg = nil,             guibg = nil, gui = 'underline', guisp = M.colors.base04 }
     hi.DiagnosticError                    = { guifg = M.colors.base08, guibg = nil, gui = 'none',      guisp = nil             }
     hi.DiagnosticWarn                     = { guifg = M.colors.base0E, guibg = nil, gui = 'none',      guisp = nil             }
     hi.DiagnosticInfo                     = { guifg = M.colors.base05, guibg = nil, gui = 'none',      guisp = nil             }
     hi.DiagnosticHint                     = { guifg = M.colors.base0C, guibg = nil, gui = 'none',      guisp = nil             }
     hi.DiagnosticUnderlineError           = { guifg = nil,             guibg = nil, gui = 'undercurl', guisp = M.colors.base08 }
     hi.DiagnosticUnderlineWarning         = { guifg = nil,             guibg = nil, gui = 'undercurl', guisp = M.colors.base0E }
+    hi.DiagnosticUnderlineWarn            = { guifg = nil,             guibg = nil, gui = 'undercurl', guisp = M.colors.base0E }
     hi.DiagnosticUnderlineInformation     = { guifg = nil,             guibg = nil, gui = 'undercurl', guisp = M.colors.base0F }
     hi.DiagnosticUnderlineHint            = { guifg = nil,             guibg = nil, gui = 'undercurl', guisp = M.colors.base0C }
-    hi.LspDiagnosticsDefaultError         = hi.DiagnosticError
-    hi.LspDiagnosticsDefaultWarning       = hi.DiagnosticWarn
-    hi.LspDiagnosticsDefaultInformation   = hi.DiagnosticInfo
-    hi.LspDiagnosticsDefaultHint          = hi.DiagnosticHint
-    hi.LspDiagnosticsUnderlineError       = hi.DiagnosticUnderlineError
-    hi.LspDiagnosticsUnderlineWarning     = hi.DiagnosticUnderlineWarning
-    hi.LspDiagnosticsUnderlineInformation = hi.DiagnosticUnderlineInformation
-    hi.LspDiagnosticsUnderlineHint        = hi.DiagnosticUnderlineHint
+
+    hi.LspReferenceText                   = { guifg = nil,             guibg = nil, gui = 'underline', guisp = M.colors.base04 }
+    hi.LspReferenceRead                   = { guifg = nil,             guibg = nil, gui = 'underline', guisp = M.colors.base04 }
+    hi.LspReferenceWrite                  = { guifg = nil,             guibg = nil, gui = 'underline', guisp = M.colors.base04 }
+    hi.LspDiagnosticsDefaultError         = 'DiagnosticError'
+    hi.LspDiagnosticsDefaultWarning       = 'DiagnosticWarn'
+    hi.LspDiagnosticsDefaultInformation   = 'DiagnosticInfo'
+    hi.LspDiagnosticsDefaultHint          = 'DiagnosticHint'
+    hi.LspDiagnosticsUnderlineError       = 'DiagnosticUnderlineError'
+    hi.LspDiagnosticsUnderlineWarning     = 'DiagnosticUnderlineWarning'
+    hi.LspDiagnosticsUnderlineInformation = 'DiagnosticUnderlineInformation'
+    hi.LspDiagnosticsUnderlineHint        = 'DiagnosticUnderlineHint'
 
     hi.TSAnnotation         = { guifg = M.colors.base0F, guibg = nil, gui = 'none',          guisp = nil }
     hi.TSAttribute          = { guifg = M.colors.base0A, guibg = nil, gui = 'none',          guisp = nil }
@@ -271,6 +279,27 @@ function M.setup(colors)
 
     hi.TreesitterContext = { guifg = nil, guibg = M.colors.base01, gui = 'italic', guisp = nil }
 
+    -- highlight NotifyERRORBorder guifg=#8A1F1F
+    -- highlight NotifyWARNBorder guifg=#79491D
+    -- highlight NotifyINFOBorder guifg=#4F6752
+    -- highlight NotifyDEBUGBorder guifg=#8B8B8B
+    -- highlight NotifyTRACEBorder guifg=#4F3552
+    -- highlight NotifyERRORIcon guifg=#F70067
+    -- highlight NotifyWARNIcon guifg=#F79000
+    -- highlight NotifyINFOIcon guifg=#A9FF68
+    -- highlight NotifyDEBUGIcon guifg=#8B8B8B
+    -- highlight NotifyTRACEIcon guifg=#D484FF
+    -- highlight NotifyERRORTitle  guifg=#F70067
+    -- highlight NotifyWARNTitle guifg=#F79000
+    -- highlight NotifyINFOTitle guifg=#A9FF68
+    -- highlight NotifyDEBUGTitle  guifg=#8B8B8B
+    -- highlight NotifyTRACETitle  guifg=#D484FF
+    -- highlight link NotifyERRORBody Normal
+    -- highlight link NotifyWARNBody Normal
+    -- highlight link NotifyINFOBody Normal
+    -- highlight link NotifyDEBUGBody Normal
+    -- highlight link NotifyTRACEBody Normal
+
     vim.g.terminal_color_0  = M.colors.base00
     vim.g.terminal_color_1  = M.colors.base08
     vim.g.terminal_color_2  = M.colors.base0B
@@ -293,7 +322,13 @@ function M.available_colorschemes()
   return vim.tbl_keys(M.colorschemes)
 end
 
-M.colorschemes = require('colors')
+M.colorschemes = {}
+setmetatable(M.colorschemes, {
+    __index = function(t, key)
+        t[key] = require(string.format('colors.%s', key))
+        return t[key]
+    end,
+})
 
 -- My own personal theme
 -- #16161D is called eigengrau and is kinda-ish the color your see when you
